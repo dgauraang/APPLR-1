@@ -43,6 +43,7 @@ parser.add_argument('--gui', dest='gui', action='store_true')
 parser.add_argument('--seed', dest='seed', type = int, default = 43)
 parser.add_argument('--avg', dest='avg', type = int, default = 2)
 parser.add_argument('--noise', dest='noise', action='store_true')
+parser.add_argument('--save', dest='save', type = str, default = "test_result.txt")
 
 args = parser.parse_args()
 model_path = args.model
@@ -53,6 +54,7 @@ avg = args.avg
 default = args.default
 policy = args.policy
 noise = args.noise
+save = args.save
 
 config_path = model_path + '/config.json'
 model_path = join(model_path, policy)
@@ -60,29 +62,33 @@ model_path = join(model_path, policy)
 with open(config_path, 'rb') as f:
     config = json.load(f)
 
-outf = open("test_result.txt", "a")
-outf.write("Start logging the test with model %s\n" %(model_path))
-if default:
-    outf.write("Using default parameter\n")
+def write_file(s):
+    outf = open(save, "a")
+    outf.write(s)
+    outf.close()
 
+print("log to %s" %(save))
+write_file("Start logging the test with model %s\n" %(model_path))
+if default:
+    write_file("Using default parameter\n")
 env_config = config['env_config']
 env_config['gui'] = gui
 wrapper_config = config['wrapper_config']
 training_config = config['training_config']
-
 if record:
     env_config['world_name'] = env_config['world_name'].split('.')[0] + '_camera' + '.world'
 
-worlds = [0, 8, 17, 19, 27, 32, 41, 47, 48, 57, 64, 69, 76, 78, 88, 93, 100, 104, 112, 118, 123, 129, 133, 138, 144, 150, 159, 163, 168, 175, 184, 189, 193, 201, 208, 214, 218, 226, 229, 237, 240, 246, 256, 258, 265, 270, 277, 284, 290, 294]
+worlds = [54, 94, 156, 68, 52, 101, 40, 135, 51, 42, 75, 67, 18, 53, 87, 36, 28, 61, 233, 25, 35, 20, 34, 79, 108, 46, 65, 90, 6, 73, 70, 10, 29, 167, 15, 31, 77, 116, 241, 155, 194, 99, 56, 149, 38, 261, 239, 234, 60, 173, 247, 178, 291, 16, 9, 21, 169, 257, 148, 296, 151, 259, 102, 145, 130, 205, 121, 105, 43, 242, 213, 171, 62, 202, 293, 224, 225, 152, 111, 55, 125, 200, 161, 1, 136, 106, 286, 139, 244, 230, 222, 238, 170, 267, 26, 132, 124, 23, 59, 3, 97, 119, 89, 12, 164, 39, 236, 263, 81, 188, 84, 11, 268, 192, 122, 22, 253, 219, 216, 137, 85, 195, 206, 212, 4, 274, 91, 248, 44, 131, 203, 63, 80, 37, 110, 50, 74, 120, 128, 249, 30, 14, 103, 49, 154, 82, 2, 143, 158, 147, 235, 83, 157, 142, 187, 185, 288, 45, 140, 271, 160, 146, 109, 223, 126, 98, 252, 134, 272, 115, 71, 117, 255, 141, 174, 33, 245, 92, 295, 281, 186, 260, 7, 166, 196, 66, 113, 153, 227, 107, 199, 298, 278, 114, 72, 165, 228, 176, 24, 162, 198, 180, 285, 232, 243, 207, 190, 262, 275, 172, 179, 269, 127, 86, 183, 273, 287, 215, 266, 95, 5, 299, 279, 13, 250, 96, 197, 177, 58, 289, 211, 220, 182, 282, 210, 280, 251, 283, 217, 276, 292, 221, 204, 191, 181, 209, 297, 264, 231, 254]
+
+worlds = [w for w in range(300) if w not in worlds]
 env_config['world_name'] = 'Benchmarking/test/world_%d.world' %(worlds[0])
 
 rospy.init_node('gym', anonymous=True, log_level=rospy.FATAL)
 rospy.set_param('/use_sim_time', True)
-
-env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v0', **env_config), **wrapper_config['wrapper_args'])
+env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous_reset-v0', **env_config), **wrapper_config['wrapper_args'])
 state_shape = env.observation_space.shape or env.observation_space.n
 action_shape = env.action_space.shape or env.action_space.n
-
+print(state_shape, action_shape)
 # Load the model
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 net = Net(training_config['num_layers'], state_shape, device=device, hidden_layer_size=training_config['hidden_size'])
@@ -128,8 +134,12 @@ else:
         ignore_done=training_config['ignore_done'],
         estimation_step=training_config['n_step'])
 print(training_config['hidden_size'])
+
 state_dict = torch.load(model_path)
 policy.load_state_dict(state_dict)
+# model_path = "actor.pth"
+# state_dict = torch.load(model_path, map_location=torch.device('cpu'))
+# policy.actor.load_state_dict(state_dict)
 
 if not noise:
     policy._noise = None
@@ -139,6 +149,7 @@ for w in worlds:
     if w != worlds[0]:
         env.close()
         env_config['world_name'] = 'Benchmarking/test/world_%d.world' %(w)
+        # env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v1', **env_config), **wrapper_config['wrapper_args'])
         env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v0', **env_config), **wrapper_config['wrapper_args'])
     rs = []
     cs = []
@@ -159,7 +170,7 @@ for w in worlds:
                 actions = policy(obs_batch).act.cpu().detach().numpy().reshape(-1)
                 #print(policy.actor(obs_batch['obs']))
             else:
-                actions = np.array([0.5, 1.57, 6, 20, 0.75, 1])
+                actions = np.array([0.5, 1.57, 6, 20, 0.1, 0.75, 1, 0.3])
             obs_new, rew, done, info = env.step(actions)
             obs = obs_new
             # plt.plot(obs)
@@ -167,6 +178,7 @@ for w in worlds:
 
             print('current step: %d, X position: %f, Y position: %f, rew: %f' %(count, info['X'], info['Y'] , rew))
             print(info['params'])
+            # params = np.array(info['params'])
             params = np.array(info['params'])
             pms = np.append(pms, np.expand_dims(params, -1), -1)
             r += rew
@@ -176,12 +188,12 @@ for w in worlds:
             succeed += 1
             rs.append(r)
             cs.append(count)
-        outf.write("%d %d %f %d\n" %(w, count, r, f))
+        write_file("%d %d %f %d\n" %(w, count*env_config['time_step'], r, f))
     try:
         print("succeed: %d/%d \t episode reward: %.2f \t steps: %d" %(succeed, avg, sum(rs)/float((len(rs))), sum(cs)/float((len(cs)))))
     except:
         pass
-outf.write("Finshed!\n")
+write_file("Finshed!\n")
 env.close()
 
 ######## About recording ###########
