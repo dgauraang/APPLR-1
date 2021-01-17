@@ -15,6 +15,11 @@ register(
 )
 
 register(
-    id='jackal_continuous_reset-v1',
+    id='jackal_continuous_reset-v0',
     entry_point='jackal_navi_envs.jackal_env_continuous_reset:JackalEnvContinuous',
+)
+
+register(
+    id='jackal_continuous_reset-v1',
+    entry_point='jackal_navi_envs.jackal_env_continuous_reset:JackalEnvContinuousNoParam',
 )

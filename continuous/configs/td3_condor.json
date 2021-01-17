@@ -13,9 +13,9 @@
     "laser_clip": 2,
     "init_position": [-8, 0, 0],
     "goal_position": [54, 0, 0],
-    "param_delta": [0.2, 0.3, 1, 2, 0.2, 0.2, 0.05],
-    "param_init": [0.5, 1.57, 6, 20, 0.75, 1, 0.3],
-    "param_list": ["max_vel_x", "max_vel_theta", "vx_samples", "vtheta_samples", "path_distance_bias", "goal_distance_bias", "inflation_radius"]
+    "param_delta": [0.2, 0.3, 1, 2, 0.02, 0.2, 0.2, 0.05],
+    "param_init": [0.5, 1.57, 6, 20, 0.1, 0.75, 1, 0.3],
+    "param_list": ["max_vel_x", "max_vel_theta", "vx_samples", "vtheta_samples", "occdist_scale", "path_distance_bias", "goal_distance_bias", "inflation_radius"]
   },
   "wrapper_config": {
     "wrapper": "bench_marking_wrapper_reward",

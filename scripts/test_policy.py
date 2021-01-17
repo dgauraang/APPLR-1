@@ -85,7 +85,7 @@ env_config['world_name'] = 'Benchmarking/test/world_%d.world' %(worlds[0])
 
 rospy.init_node('gym', anonymous=True, log_level=rospy.FATAL)
 rospy.set_param('/use_sim_time', True)
-env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous_reset-v0', **env_config), **wrapper_config['wrapper_args'])
+env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous_reset-v1', **env_config), **wrapper_config['wrapper_args'])
 state_shape = env.observation_space.shape or env.observation_space.n
 action_shape = env.action_space.shape or env.action_space.n
 print(state_shape, action_shape)
@@ -150,7 +150,7 @@ for w in worlds:
         env.close()
         env_config['world_name'] = 'Benchmarking/test/world_%d.world' %(w)
         # env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v1', **env_config), **wrapper_config['wrapper_args'])
-        env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v0', **env_config), **wrapper_config['wrapper_args'])
+        env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous_reset-v1', **env_config), **wrapper_config['wrapper_args'])
     rs = []
     cs = []
     pms = np.array(env_config['param_init'])

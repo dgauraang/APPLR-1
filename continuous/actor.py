@@ -100,10 +100,8 @@ def main(id):
     wrapper_config = config['wrapper_config']
     training_config = config['training_config']
     wrapper_dict = jackal_navi_envs.jackal_env_wrapper.wrapper_dict
-    if config['env'] == 'jackal':
-        env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v0', **env_config), **wrapper_config['wrapper_args'])
-    else:
-        env = gym.make('Pendulum-v0')
+    config["env"] = "jackal_continuous-v0" if config["env"] == "jackal" else config["env"]
+    env = wrapper_dict[wrapper_config['wrapper']](gym.make(config["env"], **env_config), **wrapper_config['wrapper_args'])
     state_shape = env.observation_space.shape or env.observation_space.n
     action_shape = env.action_space.shape or env.action_space.n
 

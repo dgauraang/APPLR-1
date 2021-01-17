@@ -4,6 +4,7 @@ discrete/results
 continuous/results
 
 discrete/configs/*
+scripts/.ipynb_checkpoints
 
 continuous/buffer_test
 continuous/results
@@ -18,4 +19,6 @@ out
 
 *.sub
 
-APPLR_melodic.simg
+*.simg
+
+*.txt

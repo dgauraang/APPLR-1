@@ -60,11 +60,9 @@ with open(os.path.join(save_path, 'config.json'), 'w') as fp:
 
 # initialize the env --> num_env can only be one right now
 wrapper_dict = jackal_navi_envs.jackal_env_wrapper.wrapper_dict
+config["env"] = "jackal_continuous-v0" if config["env"] == "jackal" else config["env"]
 if not config['use_container']:
-    if config['env'] == 'jackal':
-        env = wrapper_dict[wrapper_config['wrapper']](gym.make('jackal_continuous-v0', **env_config), **wrapper_config['wrapper_args'])
-    else:
-        env = gym.make('Pendulum-v0')
+    env = wrapper_dict[wrapper_config['wrapper']](gym.make(config["env"], **env_config), **wrapper_config['wrapper_args'])
     train_envs = DummyVectorEnv([lambda: env for _ in range(1)])
     state_shape = env.observation_space.shape or env.observation_space.n
     action_shape = env.action_space.shape or env.action_space.n
@@ -72,8 +70,8 @@ else:
     train_envs = config
     Collector = Fake_Collector
 
-    state_shape = np.array((721+len(env_config['param_list']),)) if config['env'] == 'jackal' else np.array((3,))
-    action_shape = np.array((len(env_config['param_list']),)) if config['env'] == 'jackal' else np.array((1,))
+    state_shape = np.array((721+len(env_config['param_list']),)) if config['env'] == 'jackal_continuous-v0' else np.array((721,))
+    action_shape = np.array((len(env_config['param_list']),))
 
 # config random seed
 np.random.seed(config['seed'])

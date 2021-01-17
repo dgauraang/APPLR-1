@@ -1,0 +1,2 @@
+rosbagTimestamp,header,seq,stamp,secs,nsecs,frame_id,pose,position,x,y,z,orientation,x,y,z,w
+1599930883939722004,,40,,1599931318,373095122,"""odom""",,,1.20218384266,2.29300570488,0.0,,0.0,0.0,0.999991913817,0.00402147996581

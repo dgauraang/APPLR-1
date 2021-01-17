@@ -1,0 +1,2 @@
+rosbagTimestamp,header,seq,stamp,secs,nsecs,frame_id,goal_id,stamp,secs,nsecs,id,goal,target_pose,header,seq,stamp,secs,nsecs,frame_id,pose,position,x,y,z,orientation,x,y,z,w
+1599932599597963719,,0,,1599932599,597861468,'',,,0,0,'',,,,8,,1599933033,658943517,"""odom""",,,7.21269226074,-6.78406524658,0.0,,0.0,0.0,-0.586413764782,0.810011664406
