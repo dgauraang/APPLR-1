@@ -224,6 +224,8 @@ class JackalEnvContinuous(gym.Env):
         laser_scan = self.gazebo_sim.get_laser_scan()
         local_goal = self.navi_stack.get_local_goal()
         self.navi_stack.set_global_goal()
+        self.scan = laser_scan.ranges
+        self.gp = self.navi_stack.get_global_path()
 
         self.gazebo_sim.pause()
 

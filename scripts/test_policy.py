@@ -34,11 +34,22 @@ from tianshou.exploration import GaussianNoise
 from tianshou.utils.net.continuous import Actor, ActorProb, Critic
 from tianshou.data import Batch
 
+from jackal_navi_envs.APPLX import APPLD_policy, APPLE_policy, APPLI_policy
+APPLD_policy = APPLD_policy()
+APPLE_policy = APPLE_policy()
+APPLI_policy = APPLI_policy()
+APPLX = {
+    "appld": lambda obs: APPLD_policy.forward(obs), 
+    "appli": lambda obs: APPLI_policy.forward(obs),
+    "apple": lambda obs: APPLE_policy.forward(obs),
+    "dwa": lambda obs: np.array([0.5, 1.57, 6, 20, 0.1, 0.75, 1, 0.3])
+}
+
 parser = argparse.ArgumentParser(description = 'Jackal navigation simulation')
 parser.add_argument('--model', dest = 'model', type = str, default = 'results/DQN_testbed_2020_08_30_10_58', help = 'path to the saved model and configuration')
 parser.add_argument('--policy', dest = 'policy', type = str, default = 'policy_26.pth')
 parser.add_argument('--record', dest='record', action='store_true')
-parser.add_argument('--default', dest='default', action='store_true')
+parser.add_argument('--APPLX', dest='applx', type = str, default = "", help = "policy from other algorithms. Can be dwa, appld, appli, apple")
 parser.add_argument('--gui', dest='gui', action='store_true')
 parser.add_argument('--seed', dest='seed', type = int, default = 43)
 parser.add_argument('--avg', dest='avg', type = int, default = 2)
@@ -51,7 +62,7 @@ record = args.record
 gui = 'true' if args.gui else 'false'
 seed = args.seed
 avg = args.avg
-default = args.default
+applx = args.applx
 policy = args.policy
 noise = args.noise
 save = args.save
@@ -69,8 +80,8 @@ def write_file(s):
 
 print("log to %s" %(save))
 write_file("Start logging the test with model %s\n" %(model_path))
-if default:
-    write_file("Using default parameter\n")
+if applx:
+    write_file("Using %s parameter\n" %(applx)) 
 env_config = config['env_config']
 env_config['gui'] = gui
 wrapper_config = config['wrapper_config']
@@ -162,16 +173,20 @@ for w in worlds:
         f = False
         count = 0
         obs = env.reset()
+        gp = env.gp
+        scan = env.scan
         done = False
         while not done:
             obs_batch = Batch(obs=[obs], info={})
-            # obs = torch.tensor([obs]).float()
-            if not default:
+            obs_x = [scan, gp]
+            if not applx:
                 actions = policy(obs_batch).act.cpu().detach().numpy().reshape(-1)
                 #print(policy.actor(obs_batch['obs']))
             else:
-                actions = np.array([0.5, 1.57, 6, 20, 0.1, 0.75, 1, 0.3])
+                actions = APPLX[applx](obs_x)
             obs_new, rew, done, info = env.step(actions)
+            gp = info.pop("gp")
+            scan = info.pop("scan")
             obs = obs_new
             # plt.plot(obs)
             # plt.show()
